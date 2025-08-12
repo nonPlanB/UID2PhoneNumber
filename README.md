@@ -20,10 +20,10 @@
 pip install -r requirements.txt
 ```
 
-### 2. 启动API服务
+### 2. 检查安装依赖并启动API服务
 
 ```bash
-python UID2Phone.py
+python start_api.py
 ```
 
 服务将在 `http://localhost:5000` 启动
