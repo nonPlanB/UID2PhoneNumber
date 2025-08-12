@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书UID转iPhone号码API演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+        }
+
+        .result-content {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .examples {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .examples h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .example-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .example-item:hover {
+            background: #e9ecef;
+        }
+
+        .example-uid {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .example-phone {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .api-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .api-info h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .api-info p {
+            color: #424242;
+            margin-bottom: 5px;
+        }
+
+        .api-info code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>小红书UID转iPhone号码</h1>
+            <p>输入小红书用户UID，获取对应的iPhone号码</p>
+        </div>
+
+        <form id="convertForm">
+            <div class="form-group">
+                <label for="uid">小红书UID:</label>
+                <input type="text" id="uid" name="uid" placeholder="请输入9-12位数字UID" required>
+            </div>
+            <button type="submit" class="btn">转换UID</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在转换中...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="examples">
+            <h3>示例UID</h3>
+            <div class="example-item" onclick="useExample('100000000')">
+                <span class="example-uid">100000000</span>
+                <span class="example-phone">13800138000</span>
+            </div>
+            <div class="example-item" onclick="useExample('123456789')">
+                <span class="example-uid">123456789</span>
+                <span class="example-phone">点击测试</span>
+            </div>
+            <div class="example-item" onclick="useExample('987654321')">
+                <span class="example-uid">987654321</span>
+                <span class="example-phone">点击测试</span>
+            </div>
+        </div>
+
+        <div class="api-info">
+            <h3>API信息</h3>
+            <p><strong>服务地址:</strong> <code>http://localhost:5000</code></p>
+            <p><strong>POST接口:</strong> <code>/convert</code></p>
+            <p><strong>GET接口:</strong> <code>/convert/&lt;uid&gt;</code></p>
+            <p><strong>文档地址:</strong> <code>/docs</code></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        
+        // 表单提交处理
+        document.getElementById('convertForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const uid = document.getElementById('uid').value.trim();
+            if (!uid) {
+                showError('请输入UID');
+                return;
+            }
+            
+            // 验证UID格式
+            if (!/^\d{9,12}$/.test(uid)) {
+                showError('UID必须是9-12位纯数字');
+                return;
+            }
+            
+            await convertUID(uid);
+        });
+
+        // 转换UID函数
+        async function convertUID(uid) {
+            showLoading(true);
+            hideResult();
+            
+            try {
+                const response = await fetch(`${API_BASE}/convert`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ uid: uid })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess(data);
+                } else {
+                    showError(data.error || '转换失败');
+                }
+            } catch (error) {
+                showError(`请求失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 使用示例
+        function useExample(uid) {
+            document.getElementById('uid').value = uid;
+            convertUID(uid);
+        }
+
+        // 显示加载状态
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        // 显示成功结果
+        function showSuccess(data) {
+            const result = document.getElementById('result');
+            result.className = 'result success';
+            result.style.display = 'block';
+            result.innerHTML = `
+                <h3>✅ 转换成功</h3>
+                <div class="result-content">
+                    <p><strong>UID:</strong> ${data.uid}</p>
+                    <p><strong>手机号:</strong> ${data.phone}</p>
+                    <p><strong>时间:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
+                </div>
+            `;
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const result = document.getElementById('result');
+            result.className = 'result error';
+            result.style.display = 'block';
+            result.innerHTML = `
+                <h3>❌ 转换失败</h3>
+                <div class="result-content">
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // 隐藏结果
+        function hideResult() {
+            const result = document.getElementById('result');
+            result.style.display = 'none';
+        }
+
+        // 页面加载时检查API状态
+        window.addEventListener('load', async function() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    console.log('API服务正常运行');
+                } else {
+                    showError('API服务不可用，请确保服务已启动');
+                }
+            } catch (error) {
+                showError('无法连接到API服务，请确保服务已启动在 http://localhost:5000');
+            }
+        });
+    </script>
+</body>
+</html> 
